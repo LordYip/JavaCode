@@ -39,7 +39,8 @@ jobs:
     - name: Run CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
-        output: security-results.sarif
+        category: "/language:java"
+
 
     - name: Debugging - Check if SARIF file exists
       run: |
