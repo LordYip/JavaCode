@@ -30,6 +30,8 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: java
+        queries: +security-and-quality
+
 
     - name: Compile Java Code (Using javac)
       run: |
@@ -40,6 +42,10 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:java"
+
+    - name: Debug - List All Files After CodeQL Runs
+      run: ls -lah
+
 
 
     - name: Debugging - Check if SARIF file exists
