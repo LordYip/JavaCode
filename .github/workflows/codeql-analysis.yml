@@ -1,0 +1,52 @@
+name: CodeQL Security Scan (Java)
+
+on:
+  push:
+    branches: [ main ]  # Runs when code is pushed to main
+  pull_request:
+    branches: [ main ]  # Runs when a PR is created/updated
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  analyze:
+    name: Run CodeQL Scan on Java Code
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Java environment
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'  # Use OpenJDK (Temurin)
+        java-version: '11'  # Update based on project requirements
+
+    - name: Initialize CodeQL for Java
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+        build-mode: "manual"  # Run build manually before scanning
+
+    - name: Build Java Project (Required for CodeQL)
+      run: |
+        chmod +x gradlew || true
+        ./gradlew build || mvn clean package || ant build || javac -d . $(find . -name "*.java")
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        output: security-results.sarif  # Generate SARIF file
+
+    - name: Convert SARIF to JSON (For AI Processing)
+      run: jq '.' security-results.sarif > security-results.json
+
+    - name: Upload CodeQL JSON Output as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-results
+        path: security-results.json
