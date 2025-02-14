@@ -41,8 +41,19 @@ jobs:
       with:
         output: security-results.sarif
 
+    - name: Debugging - Check if SARIF file exists
+      run: |
+        ls -lah
+        if [ -f security-results.sarif ]; then
+          echo "✅ SARIF file found!"
+        else
+          echo "❌ ERROR: security-results.sarif NOT found!"
+          exit 1
+        fi
+
     - name: Convert SARIF to JSON (For AI Processing)
       run: jq '.' security-results.sarif > security-results.json
+
 
     - name: Upload CodeQL JSON Output as Artifact
       uses: actions/upload-artifact@v4
