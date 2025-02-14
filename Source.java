@@ -1,200 +1,68 @@
-/* TEMPLATE GENERATED TESTCASE FILE
-Filename: CWE190_Integer_Overflow__byte_console_readLine_add_01.java
-Label Definition File: CWE190_Integer_Overflow.label.xml
-Template File: sources-sinks-01.tmpl.java
-*/
-/*
-* @description
-* CWE: 190 Integer Overflow
-* BadSource: console_readLine Read data from the console using readLine
-* GoodSource: A hardcoded non-zero, non-min, non-max, even number
-* Sinks: add
-*    GoodSink: Ensure there will not be an overflow before adding 1 to data
-*    BadSink : Add 1 to data, which can cause an overflow
-* Flow Variant: 01 Baseline
-*
-* */
-
-package testcases.CWE190_Integer_Overflow.s01;
-import testcasesupport.*;
-
-import javax.servlet.http.*;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-import java.util.logging.Level;
+public class VulnerableApp {
 
-public class CWE190_Integer_Overflow__byte_console_readLine_add_01 extends AbstractTestCase
-{
-    public void bad() throws Throwable
-    {
-        byte data;
+    public static void main(String[] args) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Enter username: ");
+            String username = reader.readLine();
+            System.out.print("Enter password: ");
+            String password = reader.readLine();
 
-        /* init data */
-        data = -1;
-
-        /* POTENTIAL FLAW: Read data from console with readLine*/
-        BufferedReader readerBuffered = null;
-        InputStreamReader readerInputStream = null;
-        try
-        {
-            readerInputStream = new InputStreamReader(System.in, "UTF-8");
-            readerBuffered = new BufferedReader(readerInputStream);
-            String stringNumber = readerBuffered.readLine();
-            if (stringNumber != null)
-            {
-                data = Byte.parseByte(stringNumber.trim());
+            if (authenticateUser(username, password)) {
+                System.out.println("Login successful!");
+            } else {
+                System.out.println("Login failed!");
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (IOException exceptIO)
-        {
-            IO.logger.log(Level.WARNING, "Error with stream reading", exceptIO);
-        }
-        catch (NumberFormatException exceptNumberFormat)
-        {
-            IO.logger.log(Level.WARNING, "Error with number parsing", exceptNumberFormat);
-        }
-        finally
-        {
-            /* clean up stream reading objects */
-            try
-            {
-                if (readerBuffered != null)
-                {
-                    readerBuffered.close();
-                }
-            }
-            catch (IOException exceptIO)
-            {
-                IO.logger.log(Level.WARNING, "Error closing BufferedReader", exceptIO);
-            }
-            finally
-            {
-                try
-                {
-                    if (readerInputStream != null)
-                    {
-                        readerInputStream.close();
-                    }
-                }
-                catch (IOException exceptIO)
-                {
-                    IO.logger.log(Level.WARNING, "Error closing InputStreamReader", exceptIO);
-                }
-            }
-        }
-
-        /* POTENTIAL FLAW: if data == Byte.MAX_VALUE, this will overflow */
-        byte result = (byte)(data + 1);
-
-        IO.writeLine("result: " + result);
-
     }
 
-    public void good() throws Throwable
-    {
-        goodG2B();
-        goodB2G();
+    // 🚨 CWE-200: Hardcoded Credentials (Sensitive Information Exposure)
+    private static boolean authenticateUser(String user, String pass) {
+        String hardcodedUser = "admin"; // 🚨 Hardcoded credentials
+        String hardcodedPass = "password123"; 
+
+        if (user.equals(hardcodedUser) && pass.equals(hardcodedPass)) {
+            return true;
+        }
+        return checkDatabase(user, pass);
     }
 
-    /* goodG2B() - use goodsource and badsink */
-    private void goodG2B() throws Throwable
-    {
-        byte data;
+    // 🚨 CWE-89: SQL Injection
+    private static boolean checkDatabase(String user, String pass) {
+        boolean isAuthenticated = false;
+        try {
+            // 🚨 Hardcoded database credentials (CWE-200)
+            String url = "jdbc:mysql://localhost:3306/users";
+            String dbUser = "root";
+            String dbPassword = "rootpass";
 
-        /* FIX: Use a hardcoded number that won't cause underflow, overflow, divide by zero, or loss-of-precision issues */
-        data = 2;
+            Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+            Statement stmt = conn.createStatement();
 
-        /* POTENTIAL FLAW: if data == Byte.MAX_VALUE, this will overflow */
-        byte result = (byte)(data + 1);
+            // 🚨 Unsafe SQL query (CWE-89: SQL Injection)
+            String query = "SELECT * FROM users WHERE username = '" + user + "' AND password = '" + pass + "'";
+            ResultSet rs = stmt.executeQuery(query);
 
-        IO.writeLine("result: " + result);
-
-    }
-
-    /* goodB2G() - use badsource and goodsink */
-    private void goodB2G() throws Throwable
-    {
-        byte data;
-
-        /* init data */
-        data = -1;
-
-        /* POTENTIAL FLAW: Read data from console with readLine*/
-        BufferedReader readerBuffered = null;
-        InputStreamReader readerInputStream = null;
-        try
-        {
-            readerInputStream = new InputStreamReader(System.in, "UTF-8");
-            readerBuffered = new BufferedReader(readerInputStream);
-            String stringNumber = readerBuffered.readLine();
-            if (stringNumber != null)
-            {
-                data = Byte.parseByte(stringNumber.trim());
+            if (rs.next()) {
+                isAuthenticated = true;
             }
-        }
-        catch (IOException exceptIO)
-        {
-            IO.logger.log(Level.WARNING, "Error with stream reading", exceptIO);
-        }
-        catch (NumberFormatException exceptNumberFormat)
-        {
-            IO.logger.log(Level.WARNING, "Error with number parsing", exceptNumberFormat);
-        }
-        finally
-        {
-            /* clean up stream reading objects */
-            try
-            {
-                if (readerBuffered != null)
-                {
-                    readerBuffered.close();
-                }
-            }
-            catch (IOException exceptIO)
-            {
-                IO.logger.log(Level.WARNING, "Error closing BufferedReader", exceptIO);
-            }
-            finally
-            {
-                try
-                {
-                    if (readerInputStream != null)
-                    {
-                        readerInputStream.close();
-                    }
-                }
-                catch (IOException exceptIO)
-                {
-                    IO.logger.log(Level.WARNING, "Error closing InputStreamReader", exceptIO);
-                }
-            }
-        }
 
-        /* FIX: Add a check to prevent an overflow from occurring */
-        if (data < Byte.MAX_VALUE)
-        {
-            byte result = (byte)(data + 1);
-            IO.writeLine("result: " + result);
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        else
-        {
-            IO.writeLine("data value is too large to perform addition.");
-        }
-
-    }
-
-    /* Below is the main(). It is only used when building this testcase on
-     * its own for testing or for building a binary to use in testing binary
-     * analysis tools. It is not used when compiling all the testcases as one
-     * application, which is how source code analysis tools are tested.
-     */
-    public static void main(String[] args) throws ClassNotFoundException,
-           InstantiationException, IllegalAccessException
-    {
-        mainFromParent(args);
+        return isAuthenticated;
     }
 }
-
